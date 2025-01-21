@@ -18,12 +18,6 @@
 
         <!-- Card Content -->
         <div class="p-6">
-          <!-- TODO make it a timeline of kicks and intensities rather than a COUNT -->
-          <!-- Today's Count -->
-          <!-- <div class="text-center mb-8">
-            <div class="text-5xl font-bold text-blue-500">0</div>
-            <div class="text-gray-600 mt-2">Kicks Today</div>
-          </div> -->
 
           <timeline />
 
@@ -43,13 +37,13 @@
         </div>
       </div>
 
-      <!-- History Section (Optional) -->
-      <div class="mt-4 bg-white rounded-lg shadow-lg p-6">
+      <!-- TODO History Section -->
+      <!-- <div class="mt-4 bg-white rounded-lg shadow-lg p-6">
         <h2 class="text-lg font-semibold mb-4">Today's History</h2>
-        <div class="space-y-2">
+        <div class="space-y-2"> -->
           <!-- Add history items here -->
-        </div>
-      </div>
+        <!-- </div> -->
+      <!-- </div> -->
     </div>
   </div>
 </template>

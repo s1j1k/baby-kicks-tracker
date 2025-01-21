@@ -9,7 +9,7 @@
         <div 
           v-for="(time, index) in timestamps" 
           :key="index" 
-          :style="{ left: `${(index / (timestamps.length - 1)) * 100}%` }"
+          :style="{ left: `${5 + (index / (timestamps.length - 1)) * 90}%` }"
           class="absolute top-1 -translate-x-1/2 text-gray-500 text-xs"
         >
           {{ time }}
@@ -20,7 +20,7 @@
     <div 
       v-for="(kick, index) in kicks" 
       :key="index" 
-      :style="{ left: `${kick.position}%` }"
+      :style="{ left: `${5 + (kick.position / 100) * 90}%` }"
       class="absolute top-0 -translate-y-1/2"
     >
       <UIcon name="mingcute:foot-fill" class="w-7 h-7 text-blue-950" />
@@ -43,6 +43,7 @@
 
   // TODO take kicks data as a param
   // Example kicks data (positions are percentages along the timeline)
+  // TODO just calculate positions
 const kicks = [
   { time: "7:15 AM", position: 30 }, // Example: 30% along the timeline
   { time: "2:45 PM", position: 70 },
