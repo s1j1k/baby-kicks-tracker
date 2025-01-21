@@ -10,7 +10,7 @@
           v-for="(time, index) in timestamps" 
           :key="index" 
           :style="{ left: `${5 + (index / (timestamps.length - 1)) * 90}%` }"
-          class="absolute top-1 -translate-x-1/2 text-gray-500 text-xs"
+          class="absolute top-1 -translate-x-1/2 text-gray-500 text-xs whitespace-nowrap"
         >
           {{ time }}
         </div>
