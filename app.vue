@@ -20,10 +20,12 @@
         <div class="p-6">
           <!-- TODO make it a timeline of kicks and intensities rather than a COUNT -->
           <!-- Today's Count -->
-          <div class="text-center mb-8">
+          <!-- <div class="text-center mb-8">
             <div class="text-5xl font-bold text-blue-500">0</div>
             <div class="text-gray-600 mt-2">Kicks Today</div>
-          </div>
+          </div> -->
+
+          <timeline />
 
           <!-- Main Button -->
           <button 
