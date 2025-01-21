@@ -10,7 +10,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Baby Kicks Tracker</h1>
             <div class="text-blue-500">
               <!-- You can add an icon here if you want -->
-               <!-- TODO make the icon customizable -->
+              <!-- TODO make the icon customizable -->
               <span class="text-2xl">👶</span>
             </div>
           </div>
@@ -18,11 +18,10 @@
 
         <!-- Card Content -->
         <div class="p-6">
-
           <timeline :kicks="kicks" />
 
           <!-- Main Button -->
-          <button 
+          <button
             class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-8 px-4 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
             @click="recordKick"
           >
@@ -39,7 +38,7 @@
 
           <!-- Last Kick Time -->
           <div class="mt-6 text-center text-gray-600 text-sm">
-            Last kick: {{ lastKickTime || 'No kicks recorded yet' }}
+            Last kick: {{ lastKickTime || "No kicks recorded yet" }}
           </div>
         </div>
       </div>
@@ -48,8 +47,8 @@
       <!-- <div class="mt-4 bg-white rounded-lg shadow-lg p-6">
         <h2 class="text-lg font-semibold mb-4">Today's History</h2>
         <div class="space-y-2"> -->
-          <!-- Add history items here -->
-        <!-- </div> -->
+      <!-- Add history items here -->
+      <!-- </div> -->
       <!-- </div> -->
     </div>
   </div>
@@ -61,6 +60,14 @@ const lastKickTime = ref(null);
 // TODO add typecheck
 const kicks = ref<Array<Kicks>>([]);
 
+// Check for existing kicks data
+onMounted(() => {
+  const storedKicks = getKicksData();
+  if (storedKicks) {
+    kicks.value = storedKicks;
+  }
+});
+
 function recordKick() {
   let date = new Date();
   lastKickTime.value = date.toLocaleTimeString();
@@ -68,13 +75,47 @@ function recordKick() {
   // TODO convert to a position on the timeline
 
   // Convert to a percentage of 24 hours, with a precision of 1 hour
-  let position = 100 * date.getHours() / 24;
+  let position = (100 * date.getHours()) / 24;
 
-  // TODO save to kicks data structure 
+  // TODO save to kicks data structure
   // TODO persistent save to kick data structure
   // TODO update chart with new kick
 
-  kicks.value.push({date: date, position: position});
+  kicks.value.push({ date: date, position: position });
+
+  // For MVP just save in local storage
+  saveKicksData(kicks.value);
+}
+
+function saveKicksData(kicksData) {
+  // Get the current date and set the expiration for midnight tonight
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0); // Set to midnight tonight
+
+  // Store the kicks data and the expiration timestamp
+  const data = {
+    kicks: kicksData,
+    expiresAt: midnight.getTime(), // Expiry time in milliseconds
+  };
+
+  localStorage.setItem("kicksData", JSON.stringify(data));
+}
+
+function getKicksData() {
+  const storedData = JSON.parse(localStorage.getItem("kicksData"));
+
+  if (storedData) {
+    const now = new Date().getTime();
+    // Check if the data has expired
+    if (now > storedData.expiresAt) {
+      localStorage.removeItem("kicksData"); // Clear expired data
+      return null; // No data available
+    }
+    return storedData.kicks;
+  }
+
+  return null; // No data found
 }
 </script>
 
