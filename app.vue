@@ -1,5 +1,6 @@
 <!-- app.vue -->
 <template>
+  <VitePwaManifest />
   <div class="min-h-screen bg-gray-100 p-4">
     <div class="max-w-md mx-auto">
       <!-- Main Card -->
@@ -68,6 +69,12 @@ onMounted(() => {
   }
 });
 
+// useHead({
+// link: [
+//       { rel: 'icon', href: 'https://fav.farm/👶'}
+//     ]
+// })
+
 function recordKick() {
   let date = new Date();
   lastKickTime.value = date.toLocaleTimeString();
@@ -117,8 +124,5 @@ function getKicksData() {
 
   return null; // No data found
 }
-</script>
 
-<style>
-/* Add any custom styles here */
-</style>
+</script>
