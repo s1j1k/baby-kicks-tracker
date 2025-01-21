@@ -56,16 +56,21 @@
 </template>
 
 <script setup lang="ts">
-const lastKickTime = ref(null);
+const lastKickTime = ref<String>(null);
 
 // TODO add typecheck
-const kicks = ref<Array<Kicks>>([]);
+const kicks = ref<Array<Kick>>([]);
 
 // Check for existing kicks data
 onMounted(() => {
   const storedKicks = getKicksData();
   if (storedKicks) {
     kicks.value = storedKicks;
+
+    console.log("stored kicks", storedKicks)
+    if ((storedKicks[storedKicks.length - 1] as Kick) && (storedKicks[storedKicks.length - 1] as Kick).date) {
+      lastKickTime.value = (storedKicks[storedKicks.length - 1] as Kick).date;
+    }
   }
 });
 
@@ -76,8 +81,10 @@ onMounted(() => {
 // })
 
 function recordKick() {
+  // TODO store full date for displaying history data
   let date = new Date();
-  lastKickTime.value = date.toLocaleTimeString();
+  // NOTE this is just used for the last kick visual
+  lastKickTime.value = date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
   // Add your kick recording logic here
   // TODO convert to a position on the timeline
 
@@ -88,7 +95,7 @@ function recordKick() {
   // TODO persistent save to kick data structure
   // TODO update chart with new kick
 
-  kicks.value.push({ date: date, position: position });
+  kicks.value.push({ date: lastKickTime.value, position: position });
 
   // For MVP just save in local storage
   saveKicksData(kicks.value);

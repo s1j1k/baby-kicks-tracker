@@ -43,7 +43,7 @@
 
   // TODO add typecheck
   defineProps({
-  kicks: Array<Kicks>,
+  kicks: Array<Kick>,
 })
 
   // TODO take kicks data as a param
