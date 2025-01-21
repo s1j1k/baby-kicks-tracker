@@ -41,12 +41,17 @@
     "12 AM",
   ];
 
+  // TODO add typecheck
+  defineProps({
+  kicks: Array<Kicks>,
+})
+
   // TODO take kicks data as a param
   // Example kicks data (positions are percentages along the timeline)
   // TODO just calculate positions
-const kicks = [
-  { time: "7:15 AM", position: 30 }, // Example: 30% along the timeline
-  { time: "2:45 PM", position: 70 },
-];
+// const kicks = [
+//   { time: "7:15 AM", position: 30 }, // Example: 30% along the timeline
+//   { time: "2:45 PM", position: 70 },
+// ];
   </script>
   

@@ -19,7 +19,7 @@
         <!-- Card Content -->
         <div class="p-6">
 
-          <timeline />
+          <timeline :kicks="kicks" />
 
           <!-- Main Button -->
           <button 
@@ -29,6 +29,13 @@
             <span class="mr-2">+</span>
             Record Kick
           </button>
+
+          <!-- TODO add specific logic to customize time, intensity, relative number of kicks -->
+          <!-- <UModal v-model="isOpen">
+      <div class="p-4">
+        <Placeholder class="h-48" />
+      </div>
+    </UModal> -->
 
           <!-- Last Kick Time -->
           <div class="mt-6 text-center text-gray-600 text-sm">
@@ -48,12 +55,26 @@
   </div>
 </template>
 
-<script setup>
-const lastKickTime = ref(null)
+<script setup lang="ts">
+const lastKickTime = ref(null);
+
+// TODO add typecheck
+const kicks = ref<Array<Kicks>>([]);
 
 function recordKick() {
-  lastKickTime.value = new Date().toLocaleTimeString()
+  let date = new Date();
+  lastKickTime.value = date.toLocaleTimeString();
   // Add your kick recording logic here
+  // TODO convert to a position on the timeline
+
+  // Convert to a percentage of 24 hours, with a precision of 1 hour
+  let position = 100 * date.getHours() / 24;
+
+  // TODO save to kicks data structure 
+  // TODO persistent save to kick data structure
+  // TODO update chart with new kick
+
+  kicks.value.push({date: date, position: position});
 }
 </script>
 
