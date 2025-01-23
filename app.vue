@@ -1,73 +1,71 @@
 <!-- app.vue -->
 <template>
   <VitePwaManifest />
-  <div class="min-h-screen bg-gray-100 p-4">
-    <div class="max-w-md mx-auto">
-      <!-- Main Card -->
-      <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        <!-- Card Header -->
-        <div class="p-6 border-b border-gray-200">
-          <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-bold text-gray-900">Baby Kicks Tracker</h1>
-            <div class="text-blue-500">
-              <!-- You can add an icon here if you want -->
-              <!-- TODO make the icon customizable -->
-              <span class="text-2xl">👶</span>
-            </div>
-          </div>
+  <container>
+    <!-- Main Card -->
+    <card class="overflow-hidden" main>
+      <!-- Card Header -->
+      <template #header>
+        <h1 class="text-2xl font-bold text-gray-900">Baby Kicks Tracker</h1>
+        <span class="text-2xl">👶</span>
+      </template>
+
+      <!-- Card Content -->
+      <template #default>
+        <timeline :kicks="kicks" />
+
+        <!-- Main Button -->
+        <button
+          class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-8 px-4 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
+          @click="recordKick"
+        >
+          <span class="mr-2">+</span>
+          Record Kick
+        </button>
+
+        <!-- Last Kick Time -->
+        <div class="mt-6 text-center text-gray-600 text-sm">
+          Last kick: {{ lastKickTime || "No kicks recorded yet" }}
         </div>
+      </template>
+    </card>
 
-        <!-- Card Content -->
-        <div class="p-6">
-          <timeline :kicks="kicks" />
+    <!-- History Section -->
+    <card class="mt-4">
+      <h2 class="text-lg font-semibold mb-4 text-gray-900">History</h2>
 
-          <!-- Main Button -->
-          <button
-            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-8 px-4 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
-            @click="recordKick"
-          >
-            <span class="mr-2">+</span>
-            Record Kick
-          </button>
-
-          <!-- TODO add specific logic to customize time, intensity, relative number of kicks -->
-          <!-- <UModal v-model="isOpen">
-      <div class="p-4">
-        <Placeholder class="h-48" />
+      <div v-if="user" class="space-y-2 text-gray-900">
+        <!-- Add history items here -->
+        History items
       </div>
-    </UModal> -->
+      <div v-else class="text-gray-600">Log in to save history</div>
+    </card>
 
-          <!-- Last Kick Time -->
-          <div class="mt-6 text-center text-gray-600 text-sm">
-            Last kick: {{ lastKickTime || "No kicks recorded yet" }}
-          </div>
-        </div>
-      </div>
-
-      <!-- Banner to prompt login -->
-      <!-- <div class="mt-4 bg-white rounded-lg shadow-lg p-6">
-        Login to save data
-        </div> -->
-
-      <!-- TODO History Section -->
-      <div class="mt-4 bg-white rounded-lg shadow-lg p-6">
-        <h2 class="text-lg font-semibold mb-4">History</h2>
-        
-        <div class="space-y-2" v-if="user">
-      <!-- Add history items here -->
-       History items
-      </div>
-      <div v-else> Log in to save history </div>
-      </div>
-      <!-- TODO add login button (2 possible methods) -->
-    </div>
-  </div>
+    <card>
+      <template v-if="user" #default>
+        <button
+          class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
+          @click="signOut"
+        >
+          Sign out
+        </button>
+      </template>
+      <template v-else #default>
+        <button
+          class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
+          @click="signInGooglePopup"
+        >
+          Sign in with Google
+        </button>
+      </template>
+    </card>
+  </container>
 </template>
 
 <script setup lang="ts">
 const lastKickTime = ref<String>(null);
 
-const { signInGooglePopup, user } = useFirebaseAuth(); // auto-imported
+const { signInGooglePopup, user, signOut } = useFirebaseAuth(); // auto-imported
 
 // TODO add typecheck
 const kicks = ref<Array<Kick>>([]);
@@ -78,8 +76,11 @@ onMounted(() => {
   if (storedKicks) {
     kicks.value = storedKicks;
 
-    console.log("stored kicks", storedKicks)
-    if ((storedKicks[storedKicks.length - 1] as Kick) && (storedKicks[storedKicks.length - 1] as Kick).date) {
+    console.log("stored kicks", storedKicks);
+    if (
+      (storedKicks[storedKicks.length - 1] as Kick) &&
+      (storedKicks[storedKicks.length - 1] as Kick).date
+    ) {
       lastKickTime.value = (storedKicks[storedKicks.length - 1] as Kick).date;
     }
   }
@@ -95,7 +96,11 @@ function recordKick() {
   // TODO store full date for displaying history data
   let date = new Date();
   // NOTE this is just used for the last kick visual
-  lastKickTime.value = date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+  lastKickTime.value = date.toLocaleString("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  });
   // Add your kick recording logic here
   // TODO convert to a position on the timeline
 
@@ -142,8 +147,4 @@ function getKicksData() {
 
   return null; // No data found
 }
-
-
-
-
 </script>

@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword, type User} from 'firebase/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, type User, signOut} from 'firebase/auth';
 
 export default function() {
   const { $auth } = useNuxtApp();
@@ -21,16 +21,14 @@ export default function() {
 //     return false
 //   }
 
-const { $firebase } = useNuxtApp();
-
 const signInGooglePopup = async function () {
 // Sign in with GoogleAuth Using a popup.
-var provider = new $firebase.auth.GoogleAuthProvider();
+var provider = new GoogleAuthProvider();
 provider.addScope('profile');
 provider.addScope('email');
 
 try {
-    const userCreds = await $firebase.auth().signInWithPopup(provider);
+    const userCreds = await signInWithPopup($auth, provider);
     if (userCreds) {
         // The signed-in user info.
         user.value = userCreds.user;
@@ -51,10 +49,22 @@ try {
 }
 
 
+const signOut = async function () { 
+    try {
+        await signOut($auth);
+        user.value = null;
+    } catch(error) {
+        // An error happened.
+    }
+}
+
+
+
 
   return {
     user,
     // registerUser
-    signInGooglePopup
+    signInGooglePopup,
+    signOut
   }
 }
