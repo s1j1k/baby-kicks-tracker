@@ -44,19 +44,30 @@
         </div>
       </div>
 
-      <!-- TODO History Section -->
+      <!-- Banner to prompt login -->
       <!-- <div class="mt-4 bg-white rounded-lg shadow-lg p-6">
-        <h2 class="text-lg font-semibold mb-4">Today's History</h2>
-        <div class="space-y-2"> -->
+        Login to save data
+        </div> -->
+
+      <!-- TODO History Section -->
+      <div class="mt-4 bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-lg font-semibold mb-4">History</h2>
+        
+        <div class="space-y-2" v-if="user">
       <!-- Add history items here -->
-      <!-- </div> -->
-      <!-- </div> -->
+       History items
+      </div>
+      <div v-else> Log in to save history </div>
+      </div>
+      <!-- TODO add login button (2 possible methods) -->
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 const lastKickTime = ref<String>(null);
+
+const { signInGooglePopup, user } = useFirebaseAuth(); // auto-imported
 
 // TODO add typecheck
 const kicks = ref<Array<Kick>>([]);
@@ -131,5 +142,8 @@ function getKicksData() {
 
   return null; // No data found
 }
+
+
+
 
 </script>
