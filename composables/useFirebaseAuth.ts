@@ -1,7 +1,8 @@
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, type User, signOut} from 'firebase/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, type User, signOut, type Auth} from 'firebase/auth';
 
 export default function() {
   const { $auth } = useNuxtApp();
+  const auth: Auth = ($auth as Auth);
 
   const user = useState<User | null>("fb_user", () => null);
 
@@ -28,7 +29,7 @@ provider.addScope('profile');
 provider.addScope('email');
 
 try {
-    const userCreds = await signInWithPopup($auth, provider);
+    const userCreds = await signInWithPopup(auth, provider);
     if (userCreds) {
         // The signed-in user info.
         user.value = userCreds.user;
@@ -49,9 +50,9 @@ try {
 }
 
 
-const signOut = async function () { 
+const signOutFb = async function () { 
     try {
-        await signOut($auth);
+        await signOut(auth);
         user.value = null;
     } catch(error) {
         // An error happened.
@@ -65,6 +66,6 @@ const signOut = async function () {
     user,
     // registerUser
     signInGooglePopup,
-    signOut
+    signOutFb
   }
 }

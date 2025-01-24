@@ -41,15 +41,17 @@
       <div v-else class="text-gray-600">Log in to save history</div>
     </card>
 
-    <card>
+    <card class="mt-4">
+      <!-- If the user is logged in -->
       <template v-if="user" #default>
         <button
           class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
-          @click="signOut"
+          @click="signOutFb"
         >
           Sign out
         </button>
       </template>
+      <!-- If the user is logged out -->
       <template v-else #default>
         <button
           class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
@@ -63,11 +65,8 @@
 </template>
 
 <script setup lang="ts">
-const lastKickTime = ref<String>(null);
-
-const { signInGooglePopup, user, signOut } = useFirebaseAuth(); // auto-imported
-
-// TODO add typecheck
+const lastKickTime = ref<String | null>(null);
+const { signInGooglePopup, user, signOutFb } = useFirebaseAuth(); // auto-imported
 const kicks = ref<Array<Kick>>([]);
 
 // Check for existing kicks data
@@ -85,12 +84,6 @@ onMounted(() => {
     }
   }
 });
-
-// useHead({
-// link: [
-//       { rel: 'icon', href: 'https://fav.farm/👶'}
-//     ]
-// })
 
 function recordKick() {
   // TODO store full date for displaying history data
@@ -117,7 +110,7 @@ function recordKick() {
   saveKicksData(kicks.value);
 }
 
-function saveKicksData(kicksData) {
+function saveKicksData(kicksData: Array<Kick>) {
   // Get the current date and set the expiration for midnight tonight
   const now = new Date();
   const midnight = new Date(now);
@@ -133,6 +126,7 @@ function saveKicksData(kicksData) {
 }
 
 function getKicksData() {
+  // @ts-expect-error TODO fix error
   const storedData = JSON.parse(localStorage.getItem("kicksData"));
 
   if (storedData) {

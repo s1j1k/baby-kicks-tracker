@@ -12,6 +12,9 @@ export default defineNuxtConfig({
       fbMeasurementId: process.env.NUXT_PUBLIC_FB_MEASUREMENT_ID,
     },
   },
+  typescript: {
+    typeCheck: true
+  },
   devtools: { enabled: true },
   modules: ["@nuxt/ui", "@nuxtjs/tailwindcss", "@vite-pwa/nuxt"],
   app: {
