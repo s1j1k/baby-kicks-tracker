@@ -68,6 +68,7 @@
 const lastKickTime = ref<String | null>(null);
 const { signInGooglePopup, user, signOutFb } = useFirebaseAuth(); // auto-imported
 const kicks = ref<Array<Kick>>([]);
+const { addKick } = useKickStore();
 
 // Check for existing kicks data
 onMounted(() => {
@@ -85,29 +86,42 @@ onMounted(() => {
   }
 });
 
-function recordKick() {
-  // TODO store full date for displaying history data
-  let date = new Date();
-  // NOTE this is just used for the last kick visual
-  lastKickTime.value = date.toLocaleString("en-US", {
-    hour: "numeric",
-    minute: "numeric",
-    hour12: true,
-  });
-  // Add your kick recording logic here
-  // TODO convert to a position on the timeline
+async function recordKick() {
+  if (user) {
+    // If user is logged in, record a kick in Firebase
+    try {
+      await addKick();
+      alert("Kick registered!");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to register kick.");
+    }
+  } else {
+    // Store in local storage
+    // TODO convert to composable
+    // TODO store full date for displaying history data
+    let date = new Date();
+    // NOTE this is just used for the last kick visual
+    lastKickTime.value = date.toLocaleString("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    });
+    // Add your kick recording logic here
+    // TODO convert to a position on the timeline
 
-  // Convert to a percentage of 24 hours, with a precision of 1 hour
-  let position = (100 * date.getHours()) / 24;
+    // Convert to a percentage of 24 hours, with a precision of 1 hour
+    let position = (100 * date.getHours()) / 24;
 
-  // TODO save to kicks data structure
-  // TODO persistent save to kick data structure
-  // TODO update chart with new kick
+    // TODO save to kicks data structure
+    // TODO persistent save to kick data structure
+    // TODO update chart with new kick
 
-  kicks.value.push({ date: lastKickTime.value, position: position });
+    kicks.value.push({ date: lastKickTime.value, position: position });
 
-  // For MVP just save in local storage
-  saveKicksData(kicks.value);
+    // For MVP just save in local storage
+    saveKicksData(kicks.value);
+  }
 }
 
 function saveKicksData(kicksData: Array<Kick>) {
@@ -141,4 +155,7 @@ function getKicksData() {
 
   return null; // No data found
 }
+
+// TODO watch user value and if logged in, upload everything from local
+// TODO if logged in, pull from firebase
 </script>
