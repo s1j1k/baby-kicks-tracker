@@ -75,21 +75,17 @@ const { addKick, getKicks, uploadKicksToFirestore } = useKickStore();
 const { saveKicksLocal, getKicksLocal } = useLocalStore();
 
 const loggedIn = computed(() => {
-  return user ? true : false;
+  return user.value ? true : false;
 });
 
 // Check for existing kicks data
 onMounted(async () => {
-  const storedKicks: Array<Kick> = user ? await getKicks() : getKicksLocal();
+  const storedKicks: Array<Kick> = loggedIn.value
+    ? await getKicks()
+    : getKicksLocal();
 
   if (storedKicks && Array.isArray(storedKicks) && storedKicks.length > 0) {
-    kicks.value = storedKicks;
-    if (
-      (storedKicks[storedKicks.length - 1] as Kick) &&
-      (storedKicks[storedKicks.length - 1] as Kick).date
-    ) {
-      lastKickTime.value = (storedKicks[storedKicks.length - 1] as Kick).date;
-    }
+    updateKicksFromStorage(storedKicks);
   }
 });
 
@@ -103,7 +99,7 @@ function timeFromDate(date: Date) {
 }
 
 async function recordKick() {
-  if (loggedIn) {
+  if (loggedIn.value) {
     // If user is logged in, record a kick in Firebase
     try {
       const kick = await addKick();
@@ -137,16 +133,36 @@ watch(loggedIn, async (newValue, oldValue) => {
   if (newValue && !oldValue) {
     try {
       // Upload any locally stored kicks to firebase
-      uploadKicksToFirestore(getKicksLocal());
-      // Clear local storage after successful upload
-      localStorage.removeItem("kicksData");
+      const localKicks = getKicksLocal();
+      if (localKicks) {
+        uploadKicksToFirestore(localKicks);
+        // Clear local storage after successful upload
+        localStorage.removeItem("kicksData");
+      }
       // Load all kicks from firebase storage
-      kicks.value = await getKicks();
-      // NOTE this does not sync dynamically with other devices, 
+      const storedKicks = await getKicks();
+      updateKicksFromStorage(storedKicks);
+      // NOTE this does not sync dynamically with other devices,
       // assuming user will be using one device at a time / refresh when needed
     } catch (error) {
       console.error("Failed to sync kicks data to database");
     }
   }
+});
+
+function updateKicksFromStorage(storedKicks: Array<Kick>) {
+  if (storedKicks && Array.isArray(storedKicks) && storedKicks.length > 0) {
+    kicks.value = storedKicks;
+
+    // Filter dates and get the most recent kicks from date attribute
+    lastKickTime.value = storedKicks.reduce((latest, current) => {
+      return current.date > latest.date ? current : latest;
+    }).date;
+  }
+}
+
+// FIXME just testing
+watch(kicks, () => {
+  console.dir(kicks.value);
 });
 </script>

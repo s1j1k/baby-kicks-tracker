@@ -26,7 +26,7 @@ export default defineNuxtConfig({
     manifest: {
       name: "Baby Kicks Tracker",
       short_name: "Baby Kicks",
-      theme_color: "#3b82f6",
+      theme_color: "#f3f4f6", // Match it to the background color
       description: "Sally Kalumba sallykalumba@gmail.com",
       icons: [
         {

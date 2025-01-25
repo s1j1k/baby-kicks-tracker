@@ -10,11 +10,7 @@
         v-for="(time, index) in timestamps"
         :key="index"
         :style="{
-          left: `${
-            index == 1 || index == timestamps.length - 1
-              ? 5 + (index / (timestamps.length - 1)) * 90
-              : (index / (timestamps.length - 1)) * 100
-          } %`,
+          left: `${5 + (index / (timestamps.length - 1) * 90)}%`,
         }"
         class="absolute top-1 -translate-x-1/2 text-gray-500 text-xs whitespace-nowrap"
       >
@@ -26,8 +22,8 @@
     <div
       v-for="(kick, index) in kicks"
       :key="index"
-      :style="{ left: `${getPosition(kick.date)}%` }"
-      class="absolute top-0 -translate-y-1/2"
+      :style="{ left: `${5 + getPosition(kick.date) * 90}%` }"
+      class="absolute top-0 -translate-y-1/2 -translate-x-1/2"
     >
       <UIcon name="mingcute:foot-fill" class="w-7 h-7 text-blue-950" />
     </div>
@@ -44,10 +40,11 @@ defineProps({
 });
 
 function getPosition(date: Date) {
-  // Return a percentage of the day to the nearest hour
+  // Return a fraction of the day to the nearest hour
+  const timeInHours = Math.round(
+    (date.getHours() * 60 + date.getMinutes() + date.getSeconds() / 60) / 60
+  );
 
-  const timeInHours =
-    (date.getHours() * 60 + date.getMinutes() + date.getSeconds() / 60) / 60;
-  return Math.round(timeInHours / 24) * 100;
+  return (timeInHours / 24);
 }
 </script>

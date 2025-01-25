@@ -25,14 +25,19 @@ export const useLocalStore = () => {
             localStorage.removeItem("kicksData"); // Clear expired data
             return null; // No data available
           }
-          return storedData.kicks;
+          return storedData.kicks.map((kick: Kick) => {
+            if (typeof kick.date == "string") { 
+              kick.date = new Date(kick.date); // Convert string date to Date object
+            }
+            return kick;
+          });
         }
       
         return null; // No data found
       }
 
     return {
-        saveKicksLocal
+        saveKicksLocal,
         getKicksLocal
       };
 }
