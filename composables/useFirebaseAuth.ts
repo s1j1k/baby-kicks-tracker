@@ -1,71 +1,60 @@
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, type User, signOut, type Auth} from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+  signOut,
+  setPersistence,
+  browserLocalPersistence,
+  type User,
+  type Auth,
+} from "firebase/auth";
 
-export default function() {
+export default function () {
   const { $auth } = useNuxtApp();
-  const auth: Auth = ($auth as Auth);
+  const auth: Auth = $auth as Auth;
 
+  // Use a reactive state to store the user
   const user = useState<User | null>("fb_user", () => null);
 
-//   const registerUser = async (email: string, password: string): Promise<boolean> => {
-//     try {
-//       const userCreds = await createUserWithEmailAndPassword($auth, email, password)
-//       if (userCreds) {
-//         user.value = userCreds.user
-//         return true
-//       }
-//     } catch (error: unknown) {
-//       if (error instanceof Error) {
-//         // handle error
-//       }
-//       return false
-//     }
-//     return false
-//   }
+  // Initialize authentication state listener
+  onAuthStateChanged(auth, (currentUser) => {
+    user.value = currentUser;
+  });
 
-const signInGooglePopup = async function () {
-// Sign in with GoogleAuth Using a popup.
-var provider = new GoogleAuthProvider();
-provider.addScope('profile');
-provider.addScope('email');
+  const signInGooglePopup = async () => {
+    // Set persistence to local (persists even after page reload)
+    await setPersistence(auth, browserLocalPersistence);
 
-try {
-    const userCreds = await signInWithPopup(auth, provider);
-    if (userCreds) {
-        // The signed-in user info.
-        user.value = userCreds.user;
-        return true;
-    }
-    // // This gives you a Google Access Token.
-    // var token = result.credential.accessToken;
-    //
-    // var user = result.user;
-   
-} catch (error: unknown) {
-    if (error instanceof Error) {
-      // handle error
-    }
-    return false
-  }
-  return false
-}
+    const provider = new GoogleAuthProvider();
+    provider.addScope("profile");
+    provider.addScope("email");
 
-
-const signOutFb = async function () { 
     try {
-        await signOut(auth);
-        user.value = null;
-    } catch(error) {
-        // An error happened.
+      const userCreds = await signInWithPopup(auth, provider);
+      if (userCreds) {
+        user.value = userCreds.user; // Update state with signed-in user
+        return true;
+      }
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+      return false;
     }
-}
+    return false;
+  };
 
-
-
+  const signOutFb = async () => {
+    try {
+      await signOut(auth);
+      user.value = null;
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   return {
     user,
-    // registerUser
     signInGooglePopup,
-    signOutFb
-  }
+    signOutFb,
+  };
 }
