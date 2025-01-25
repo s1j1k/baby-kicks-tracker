@@ -25,7 +25,10 @@
 
         <!-- Last Kick Time -->
         <div class="mt-6 text-center text-gray-600 text-sm">
-          Last kick: {{ lastKickTime || "No kicks recorded yet" }}
+          Last kick:
+          {{
+            lastKickTime ? timeFromDate(lastKickTime) : "No kicks recorded yet"
+          }}
         </div>
       </template>
     </card>
@@ -34,7 +37,7 @@
     <card class="mt-4">
       <h2 class="text-lg font-semibold mb-4 text-gray-900">History</h2>
 
-      <div v-if="user" class="space-y-2 text-gray-900">
+      <div v-if="loggedIn" class="space-y-2 text-gray-900">
         <!-- Add history items here -->
         History items
       </div>
@@ -43,7 +46,7 @@
 
     <card class="mt-4">
       <!-- If the user is logged in -->
-      <template v-if="user" #default>
+      <template v-if="loggedIn" #default>
         <button
           class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
           @click="signOutFb"
@@ -65,18 +68,22 @@
 </template>
 
 <script setup lang="ts">
-const lastKickTime = ref<String | null>(null);
+const lastKickTime = ref<Date | null>(null);
 const { signInGooglePopup, user, signOutFb } = useFirebaseAuth(); // auto-imported
 const kicks = ref<Array<Kick>>([]);
-const { addKick } = useKickStore();
+const { addKick, getKicks, uploadKicksToFirestore } = useKickStore();
+const { saveKicksLocal, getKicksLocal } = useLocalStore();
+
+const loggedIn = computed(() => {
+  return user ? true : false;
+});
 
 // Check for existing kicks data
-onMounted(() => {
-  const storedKicks = getKicksData();
-  if (storedKicks) {
-    kicks.value = storedKicks;
+onMounted(async () => {
+  const storedKicks: Array<Kick> = user ? await getKicks() : getKicksLocal();
 
-    console.log("stored kicks", storedKicks);
+  if (storedKicks && Array.isArray(storedKicks) && storedKicks.length > 0) {
+    kicks.value = storedKicks;
     if (
       (storedKicks[storedKicks.length - 1] as Kick) &&
       (storedKicks[storedKicks.length - 1] as Kick).date
@@ -86,76 +93,60 @@ onMounted(() => {
   }
 });
 
+// TODO move to helpers file
+function timeFromDate(date: Date) {
+  return date.toLocaleString("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  });
+}
+
 async function recordKick() {
-  if (user) {
+  if (loggedIn) {
     // If user is logged in, record a kick in Firebase
     try {
-      await addKick();
-      alert("Kick registered!");
+      const kick = await addKick();
+      console.info("Kick registered!");
+      if (kick) {
+        // NOTE we assume here there is no need to sync dynamically (user adding from 2 devices at the same time)
+        kicks.value.push(kick);
+        lastKickTime.value = kick.date;
+      }
     } catch (error) {
       console.error(error);
-      alert("Failed to register kick.");
+      console.info("Failed to register kick.");
     }
   } else {
-    // Store in local storage
-    // TODO convert to composable
-    // TODO store full date for displaying history data
-    let date = new Date();
-    // NOTE this is just used for the last kick visual
-    lastKickTime.value = date.toLocaleString("en-US", {
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    });
-    // Add your kick recording logic here
-    // TODO convert to a position on the timeline
+    const date = new Date();
+    kicks.value.push({ date: date });
+    lastKickTime.value = date;
 
-    // Convert to a percentage of 24 hours, with a precision of 1 hour
-    let position = (100 * date.getHours()) / 24;
-
-    // TODO save to kicks data structure
-    // TODO persistent save to kick data structure
-    // TODO update chart with new kick
-
-    kicks.value.push({ date: lastKickTime.value, position: position });
-
-    // For MVP just save in local storage
-    saveKicksData(kicks.value);
+    // Save in local storage
+    saveKicksLocal(kicks.value);
   }
 }
 
-function saveKicksData(kicksData: Array<Kick>) {
-  // Get the current date and set the expiration for midnight tonight
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(24, 0, 0, 0); // Set to midnight tonight
+watch(loggedIn, async (newValue, oldValue) => {
+  // FIXME required?
+  // Clear local storage when user signs out
+  // if (oldValue && !newValue) {
+  //   kicks.value = [];
+  // }
 
-  // Store the kicks data and the expiration timestamp
-  const data = {
-    kicks: kicksData,
-    expiresAt: midnight.getTime(), // Expiry time in milliseconds
-  };
-
-  localStorage.setItem("kicksData", JSON.stringify(data));
-}
-
-function getKicksData() {
-  // @ts-expect-error TODO fix error
-  const storedData = JSON.parse(localStorage.getItem("kicksData"));
-
-  if (storedData) {
-    const now = new Date().getTime();
-    // Check if the data has expired
-    if (now > storedData.expiresAt) {
-      localStorage.removeItem("kicksData"); // Clear expired data
-      return null; // No data available
+  if (newValue && !oldValue) {
+    try {
+      // Upload any locally stored kicks to firebase
+      uploadKicksToFirestore(getKicksLocal());
+      // Clear local storage after successful upload
+      localStorage.removeItem("kicksData");
+      // Load all kicks from firebase storage
+      kicks.value = await getKicks();
+      // NOTE this does not sync dynamically with other devices, 
+      // assuming user will be using one device at a time / refresh when needed
+    } catch (error) {
+      console.error("Failed to sync kicks data to database");
     }
-    return storedData.kicks;
   }
-
-  return null; // No data found
-}
-
-// TODO watch user value and if logged in, upload everything from local
-// TODO if logged in, pull from firebase
+});
 </script>

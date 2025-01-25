@@ -37,6 +37,8 @@
 <script setup lang="ts">
 const timestamps = ["12 AM", "6 AM", "12 PM", "6 PM", "12 AM"];
 
+// TODO handle other properties
+
 defineProps({
   kicks: Array<Kick>,
 });
