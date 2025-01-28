@@ -2,7 +2,7 @@
   <!-- TIMELINE -->
   <div class="relative w-full mb-12">
     <!-- Horizontal Timeline Bar -->
-    <div class="bg-blue-400 rounded-lg h-3 w-full relative"></div>
+    <div id="timeline" class="bg-blue-400 rounded-lg h-3 w-full relative"></div>
 
     <!-- Timestamps -->
     <div class="relative">
@@ -10,7 +10,7 @@
         v-for="(time, index) in timestamps"
         :key="index"
         :style="{
-          left: `${5 + (index / (timestamps.length - 1) * 90)}%`,
+          left: `${5 + (index / (timestamps.length - 1)) * 90}%`,
         }"
         class="absolute top-1 -translate-x-1/2 text-gray-500 text-xs whitespace-nowrap"
       >
@@ -45,6 +45,21 @@ function getPosition(date: Date) {
     (date.getHours() * 60 + date.getMinutes() + date.getSeconds() / 60) / 60
   );
 
-  return (timeInHours / 24);
+  return timeInHours / 24;
 }
 </script>
+
+<style>
+#timeline {
+  background-image: linear-gradient(
+    to right,
+    red,
+    orange,
+    yellow,
+    green,
+    blue,
+    indigo,
+    violet
+  );
+}
+</style>

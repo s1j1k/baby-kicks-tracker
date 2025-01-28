@@ -15,6 +15,9 @@ export default defineNuxtConfig({
   typescript: {
     typeCheck: true
   },
+  colorMode: {
+    preference: 'light'
+  },
   devtools: { enabled: true },
   modules: ["@nuxt/ui", "@nuxtjs/tailwindcss", "@vite-pwa/nuxt"],
   app: {

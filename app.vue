@@ -1,27 +1,26 @@
 <!-- app.vue -->
 <template>
   <VitePwaManifest />
-  <container>
-    <!-- Main Card -->
-    <card class="overflow-hidden" main>
-      <!-- Card Header -->
-      <template #header>
-        <h1 class="text-2xl font-bold text-gray-900">Baby Kicks Tracker</h1>
-        <span class="text-2xl">👶</span>
-      </template>
+  <!-- <UContainer :ui="{ constrained: 'max-w-md', base: 'mx-auto' }"> -->
+    <UContainer>
+    <div class="min-h-screen bg-grey-100 max-w-md pt-4">
+      <UCard class="overflow-hidden">
+        <template #header>
+          <div class="flex items-center justify-between">
+            <h1 class="text-2xl font-bold">Baby Kicks Tracker</h1>
+            <span class="text-2xl">👶</span>
+          </div>
+        </template>
 
-      <!-- Card Content -->
-      <template #default>
         <timeline :kicks="kicks" />
-
         <!-- Main Button -->
-        <button
-          class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-8 px-4 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
+        <UButton
+          icon="material-symbols:add-rounded"
+          label="Record Kick"
+          block
+          size="xl"
           @click="recordKick"
-        >
-          <span class="mr-2">+</span>
-          Record Kick
-        </button>
+        />
 
         <!-- Last Kick Time -->
         <div class="mt-6 text-center text-gray-600 text-sm">
@@ -30,46 +29,61 @@
             lastKickTime ? timeFromDate(lastKickTime) : "No kicks recorded yet"
           }}
         </div>
-      </template>
-    </card>
+      </UCard>
 
-    <!-- History Section -->
-    <card class="mt-4">
-      <h2 class="text-lg font-semibold mb-4 text-gray-900">History</h2>
+      <!-- History Section -->
+      <UCard class="mt-4">
+        <h2 class="text-lg font-semibold mb-4">History</h2>
+        <div v-if="loggedIn" class="space-y-2 text-gray-900">
+          <!-- Add history items here -->
+          History items
+        </div>
+        <div v-else class="text-gray-600">Log in to save history</div>
+      </UCard>
 
-      <div v-if="loggedIn" class="space-y-2 text-gray-900">
-        <!-- Add history items here -->
-        History items
-      </div>
-      <div v-else class="text-gray-600">Log in to save history</div>
-    </card>
+      <!-- FIXME make it not on a card, just buttons for login -->
+      <UCard class="mt-4">
+        <div v-if="loggedIn" class="space-y-4">
+          <button
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
+            @click="signOutFb"
+          >
+            Sign out
+          </button>
+        </div>
+        <!-- If the user is logged out -->
+        <div v-else class="space-y-4">
+          <UButton
+            label="Login"
+            @click="openLoginModal = true"
+            block
+            size="xl"
+          />
+          <login-modal v-model="openLoginModal" />
 
-    <card class="mt-4">
-      <!-- If the user is logged in -->
-      <template v-if="loggedIn" #default>
-        <button
-          class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
-          @click="signOutFb"
-        >
-          Sign out
-        </button>
-      </template>
-      <!-- If the user is logged out -->
-      <template v-else #default>
-        <button
-          class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
-          @click="signInGooglePopup"
-        >
-          Sign in with Google
-        </button>
-      </template>
-    </card>
-  </container>
+          <UButton
+            label="Create Account"
+            @click="createAccModal = true"
+            block
+            size="xl"
+            variant="outline"
+          />
+          <create-acc-modal v-model="createAccModal" />
+        </div>
+      </UCard>
+    </div>
+  </UContainer>
 </template>
 
 <script setup lang="ts">
 const lastKickTime = ref<Date | null>(null);
-const { signInGooglePopup, user, signOutFb } = useFirebaseAuth(); // auto-imported
+const {
+  signInGooglePopup,
+  user,
+  signOutFb,
+  signInEmailPassword,
+  registerUser,
+} = useFirebaseAuth();
 const kicks = ref<Array<Kick>>([]);
 const { addKick, getKicks, uploadKicksToFirestore } = useKickStore();
 const { saveKicksLocal, getKicksLocal } = useLocalStore();
@@ -77,6 +91,9 @@ const { saveKicksLocal, getKicksLocal } = useLocalStore();
 const loggedIn = computed(() => {
   return user.value ? true : false;
 });
+
+const openLoginModal = ref(false);
+const createAccModal = ref(false);
 
 // Check for existing kicks data
 onMounted(async () => {
@@ -160,9 +177,5 @@ function updateKicksFromStorage(storedKicks: Array<Kick>) {
     }).date;
   }
 }
-
-// FIXME just testing
-watch(kicks, () => {
-  console.dir(kicks.value);
-});
 </script>
+

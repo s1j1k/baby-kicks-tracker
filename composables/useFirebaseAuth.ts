@@ -8,6 +8,7 @@ import {
   browserLocalPersistence,
   type User,
   type Auth,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 
 export default function () {
@@ -43,6 +44,44 @@ export default function () {
     return false;
   };
 
+  const registerUser = async (
+    email: string,
+    password: string
+  ): Promise<boolean> => {
+    try {
+      const userCreds = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      if (userCreds) {
+        user.value = userCreds.user;
+        return true;
+      }
+    } catch (error: unknown) {
+      console.error("Error creating user with email:", error);
+      return false;
+    }
+    return false;
+  };
+
+  const signInEmailPassword = async (email: string, password: string) => {
+    // Set persistence to local (persists even after page reload)
+    await setPersistence(auth, browserLocalPersistence);
+
+    try {
+      const userCreds = await signInWithEmailAndPassword(auth, email, password);
+      if (userCreds) {
+        user.value = userCreds.user; // Update state with signed-in user
+        return true;
+      }
+    } catch (error) {
+      console.error("Error signing in with email and password:", error);
+      return false;
+    }
+    return false;
+  };
+
   const signOutFb = async () => {
     try {
       await signOut(auth);
@@ -54,6 +93,8 @@ export default function () {
 
   return {
     user,
+    registerUser,
+    signInEmailPassword,
     signInGooglePopup,
     signOutFb,
   };

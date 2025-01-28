@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
@@ -30,9 +30,9 @@ export default defineNuxtPlugin((nuxtApp) => {
   const auth = getAuth(app);
   const firestore = getFirestore(app);
 
-  nuxtApp.vueApp.provide("auth", auth);
+  // nuxtApp.vueApp.provide("auth", auth);
   nuxtApp.provide("auth", auth);
 
-  nuxtApp.vueApp.provide("firestore", firestore);
+  // nuxtApp.vueApp.provide("firestore", firestore);
   nuxtApp.provide("firestore", firestore);
 });
