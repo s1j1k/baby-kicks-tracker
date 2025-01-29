@@ -2,7 +2,7 @@
   <!-- TIMELINE -->
   <div class="relative w-full mb-12">
     <!-- Horizontal Timeline Bar -->
-    <div id="timeline" class="bg-blue-400 rounded-lg h-3 w-full relative"></div>
+    <div class="bg-blue-400 rounded-lg h-3 w-full relative"></div>
 
     <!-- Timestamps -->
     <div class="relative">
@@ -48,18 +48,3 @@ function getPosition(date: Date) {
   return timeInHours / 24;
 }
 </script>
-
-<style>
-#timeline {
-  background-image: linear-gradient(
-    to right,
-    red,
-    orange,
-    yellow,
-    green,
-    blue,
-    indigo,
-    violet
-  );
-}
-</style>

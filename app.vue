@@ -2,7 +2,7 @@
 <template>
   <VitePwaManifest />
   <!-- <UContainer :ui="{ constrained: 'max-w-md', base: 'mx-auto' }"> -->
-    <UContainer>
+  <UContainer>
     <div class="min-h-screen bg-grey-100 max-w-md pt-4">
       <UCard class="overflow-hidden">
         <template #header>
@@ -63,12 +63,12 @@
 
           <UButton
             label="Create Account"
-            @click="createAccModal = true"
+            @click="openCreateAccModal = true"
             block
             size="xl"
             variant="outline"
           />
-          <create-acc-modal v-model="createAccModal" />
+          <create-acc-modal v-model="openCreateAccModal" />
         </div>
       </UCard>
     </div>
@@ -93,7 +93,7 @@ const loggedIn = computed(() => {
 });
 
 const openLoginModal = ref(false);
-const createAccModal = ref(false);
+const openCreateAccModal = ref(false);
 
 // Check for existing kicks data
 onMounted(async () => {
@@ -178,4 +178,3 @@ function updateKicksFromStorage(storedKicks: Array<Kick>) {
   }
 }
 </script>
-
