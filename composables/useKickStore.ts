@@ -97,6 +97,6 @@ export const useKickStore = () => {
   return {
     addKick,
     getKicks,
-    uploadKicksToFirestore
+    uploadKicksToFirestore,
   };
 };
