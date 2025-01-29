@@ -19,11 +19,13 @@ export default function () {
   const user = useState<User | null>("fb_user", () => null);
 
   // Initialize authentication state listener
-  onAuthStateChanged(auth, (currentUser) => {
-    if (currentUser) {
-      user.value = currentUser;
-    }
-  });
+  const initializeAuthStateListener = () => {
+    onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        user.value = currentUser;
+      }
+    });
+  };
 
   const signInGooglePopup = async () => {
     // Set persistence to local (persists even after page reload)
@@ -37,6 +39,7 @@ export default function () {
       const userCreds = await signInWithPopup(auth, provider);
       if (userCreds) {
         user.value = userCreds.user; // Update state with signed-in user
+        initializeAuthStateListener();
         return true;
       }
     } catch (error) {
@@ -61,6 +64,7 @@ export default function () {
       );
       if (userCreds) {
         user.value = userCreds.user;
+        initializeAuthStateListener();
         return true;
       }
     } catch (error: unknown) {
@@ -78,6 +82,7 @@ export default function () {
       const userCreds = await signInWithEmailAndPassword(auth, email, password);
       if (userCreds) {
         user.value = userCreds.user; // Update state with signed-in user
+        initializeAuthStateListener();
         return true;
       }
     } catch (error) {
