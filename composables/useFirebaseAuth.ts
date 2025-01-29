@@ -19,7 +19,7 @@ export default function () {
   const user = useState<User | null>("fb_user", () => null);
 
   // Initialize authentication state listener
-  onAuthStateChanged(auth, (currentUser) => {
+  onAuthStateChanged($auth as Auth, (currentUser) => {
     if (currentUser) {
       user.value = currentUser;
     }
