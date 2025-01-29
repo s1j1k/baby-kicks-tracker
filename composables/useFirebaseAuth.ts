@@ -18,15 +18,6 @@ export default function () {
   // Use a reactive state to store the user
   const user = useState<User | null>("fb_user", () => null);
 
-  // Initialize authentication state listener
-  const initializeAuthStateListener = () => {
-    onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        user.value = currentUser;
-      }
-    });
-  };
-
   const signInGooglePopup = async () => {
     // Set persistence to local (persists even after page reload)
     await setPersistence(auth, browserLocalPersistence);
@@ -41,7 +32,6 @@ export default function () {
         user.value = userCreds.user; // Update state with signed-in user
         return true;
       }
-      initializeAuthStateListener();
     } catch (error) {
       console.error("Error signing in with Google:", error);
       return false;
@@ -54,6 +44,9 @@ export default function () {
     password: string
   ): Promise<boolean> => {
     try {
+      // Set persistence to local (persists even after page reload)
+      await setPersistence(auth, browserLocalPersistence);
+
       const userCreds = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -61,7 +54,6 @@ export default function () {
       );
       if (userCreds) {
         user.value = userCreds.user;
-        initializeAuthStateListener();
         return true;
       }
     } catch (error: unknown) {
@@ -79,7 +71,6 @@ export default function () {
       const userCreds = await signInWithEmailAndPassword(auth, email, password);
       if (userCreds) {
         user.value = userCreds.user; // Update state with signed-in user
-        initializeAuthStateListener();
         return true;
       }
     } catch (error) {
