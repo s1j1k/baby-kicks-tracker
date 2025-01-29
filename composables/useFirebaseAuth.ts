@@ -20,7 +20,9 @@ export default function () {
 
   // Initialize authentication state listener
   onAuthStateChanged(auth, (currentUser) => {
-    user.value = currentUser;
+    if (currentUser) {
+      user.value = currentUser;
+    }
   });
 
   const signInGooglePopup = async () => {
