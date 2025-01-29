@@ -1,7 +1,6 @@
 <!-- app.vue -->
 <template>
   <VitePwaManifest />
-  <!-- <UContainer :ui="{ constrained: 'max-w-md', base: 'mx-auto' }"> -->
   <UContainer>
     <div class="min-h-screen bg-grey-100 max-w-md pt-4">
       <UCard class="overflow-hidden">
@@ -12,7 +11,7 @@
           </div>
         </template>
 
-        <timeline :kicks="kicks" />
+        <timeline :kicks="todayKicks" />
         <!-- Main Button -->
         <UButton
           icon="material-symbols:add-rounded"
@@ -37,7 +36,7 @@
         <div v-if="loggedIn" class="space-y-2 text-gray-900">
           <!-- Add history items here -->
           History items
-          <UTable :rows="historyItems" />
+          <UTable :rows="historyItems" :sort="sort" />
           <div
             class="flex justify-end px-3 py-3.5 border-t border-gray-200 dark:border-gray-700"
           >
@@ -207,6 +206,11 @@ function updateKicksFromStorage(storedKicks: Array<Kick>) {
 const page = ref(1);
 const pageCount = 5;
 
+const sort = ref({
+  column: 'date',
+  direction: 'desc' as "desc" | "asc"
+})
+
 const historyItems = computed(() => {
   const historyItems = kicks.value.slice(
     (page.value - 1) * pageCount,
@@ -217,4 +221,14 @@ const historyItems = computed(() => {
     return { ...kick, date: formatDate(kick.date) };
   });
 });
+
+// TODO allow to view the timeline for previous days
+const todayKicks = computed(() => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date();
+  tomorrow.setHours(24, 0, 0, 0);
+
+  return kicks.value.filter((kick) => kick.date >= today && kick.date < tomorrow);
+})
 </script>
