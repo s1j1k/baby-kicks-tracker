@@ -18,11 +18,6 @@ export default function () {
   // Use a reactive state to store the user
   const user = useState<User | null>("fb_user", () => null);
 
-  // Initialize authentication state listener
-  onAuthStateChanged(auth, (currentUser) => {
-    user.value = currentUser;
-  });
-
   const signInGooglePopup = async () => {
     // Set persistence to local (persists even after page reload)
     await setPersistence(auth, browserLocalPersistence);
@@ -49,6 +44,9 @@ export default function () {
     password: string
   ): Promise<boolean> => {
     try {
+      // Set persistence to local (persists even after page reload)
+      await setPersistence(auth, browserLocalPersistence);
+
       const userCreds = await createUserWithEmailAndPassword(
         auth,
         email,
