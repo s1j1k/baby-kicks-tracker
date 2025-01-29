@@ -37,6 +37,16 @@
         <div v-if="loggedIn" class="space-y-2 text-gray-900">
           <!-- Add history items here -->
           History items
+          <UTable :rows="historyItems" />
+          <div
+            class="flex justify-end px-3 py-3.5 border-t border-gray-200 dark:border-gray-700"
+          >
+            <UPagination
+              v-model="page"
+              :page-count="pageCount"
+              :total="kicks.length"
+            />
+          </div>
         </div>
         <div v-else class="text-gray-600">Log in to save history</div>
       </UCard>
@@ -115,6 +125,22 @@ function timeFromDate(date: Date) {
   });
 }
 
+function formatDate(date: Date): string {
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  };
+  const datePart = new Intl.DateTimeFormat("en-US", options).format(date);
+  const timePart = date.toLocaleString("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  });
+
+  return `${datePart} at ${timePart}`;
+}
+
 async function recordKick() {
   if (loggedIn.value) {
     // If user is logged in, record a kick in Firebase
@@ -177,4 +203,18 @@ function updateKicksFromStorage(storedKicks: Array<Kick>) {
     }).date;
   }
 }
+
+const page = ref(1);
+const pageCount = 5;
+
+const historyItems = computed(() => {
+  const historyItems = kicks.value.slice(
+    (page.value - 1) * pageCount,
+    page.value * pageCount
+  );
+
+  return historyItems.map((kick) => {
+    return { ...kick, date: formatDate(kick.date) };
+  });
+});
 </script>
