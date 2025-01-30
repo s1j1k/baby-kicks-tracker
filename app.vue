@@ -11,73 +11,111 @@
           </div>
         </template>
 
-        <timeline :kicks="todayKicks" />
-        <!-- Main Button -->
-        <UButton
-          icon="material-symbols:add-rounded"
-          label="Record Kick"
-          block
-          size="xl"
-          @click="recordKick"
-        />
+        <div v-if="loaded">
+          <timeline :kicks="todayKicks" />
+          <!-- Main Button -->
+          <UButton
+            icon="material-symbols:add-rounded"
+            label="Record Kick"
+            block
+            size="xl"
+            @click="recordKick"
+          />
 
-        <!-- Last Kick Time -->
-        <div class="mt-6 text-center text-gray-600 text-sm">
-          Last kick:
-          {{
-            lastKickTime ? timeFromDate(lastKickTime) : "No kicks recorded yet"
-          }}
+          <!-- Last Kick Time -->
+          <div class="mt-6 text-center text-gray-600 text-sm">
+            Last kick:
+            {{
+              lastKickTime
+                ? timeFromDate(lastKickTime)
+                : "No kicks recorded yet"
+            }}
+          </div>
+        </div>
+
+        <!-- Skeleton Loader -->
+        <div v-else>
+          <!-- Overall Skeleton -->
+          <USkeleton class="h-[150px] w-full rounded-md mb-4" />
+          <!-- Skeleton for Timeline -->
+          <!-- <USkeleton class="h-[200px] w-full rounded-md mb-4" /> -->
+
+          <!-- Skeleton for Main Button -->
+          <!-- NOTE this was very accurate -->
+          <!-- <USkeleton class="h-12 w-full rounded-lg mb-6" /> -->
+
+          <!-- Skeleton for Last Kick Time -->
+          <!-- <USkeleton class="h-4 w-[150px] mx-auto mt-6" /> -->
         </div>
       </UCard>
 
       <!-- History Section -->
       <UCard class="mt-4">
-        <h2 class="text-lg font-semibold mb-4">History</h2>
-        <div v-if="loggedIn" class="space-y-2 text-gray-900">
-          <!-- Add history items here -->
-          History items
-          <UTable :rows="historyItems" :sort="sort" />
-          <div
-            class="flex justify-end px-3 py-3.5 border-t border-gray-200 dark:border-gray-700"
-          >
-            <UPagination
-              v-model="page"
-              :page-count="pageCount"
-              :total="kicks.length"
+        <div v-if="loaded">
+          <h2 class="text-lg font-semibold mb-4">History</h2>
+          <div v-if="loggedIn" class="space-y-2 text-gray-900">
+            <!-- Add history items here -->
+            History items
+            <UTable
+              :rows="historyItems"
+              :sort="sort"
+              :progress="{ color: 'primary', animation: 'carousel' }"
             />
+            <div
+              class="flex justify-end px-3 py-3.5 border-t border-gray-200 dark:border-gray-700"
+            >
+              <UPagination
+                v-model="page"
+                :page-count="pageCount"
+                :total="kicks.length"
+              />
+            </div>
           </div>
+          <div v-else class="text-gray-600">Log in to save history</div>
         </div>
-        <div v-else class="text-gray-600">Log in to save history</div>
+
+        <div v-else>
+          <USkeleton class="h-[116px] w-full rounded-md" />
+        </div>
       </UCard>
 
       <!-- FIXME make it not on a card, just buttons for login -->
       <UCard class="mt-4">
-        <div v-if="loggedIn" class="space-y-4">
-          <button
-            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
-            @click="signOutFb"
-          >
-            Sign out
-          </button>
-        </div>
-        <!-- If the user is logged out -->
-        <div v-else class="space-y-4">
-          <UButton
-            label="Login"
-            @click="openLoginModal = true"
-            block
-            size="xl"
-          />
-          <login-modal v-model="openLoginModal" />
+        <div v-if="loaded">
+          <div v-if="loggedIn" class="space-y-4">
+            <button
+              class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-2 rounded-lg text-xl transition-colors duration-200 flex items-center justify-center"
+              @click="signOutFb"
+            >
+              Sign out
+            </button>
+          </div>
+          <!-- If the user is logged out -->
+          <div v-else class="space-y-4">
+            <UButton
+              label="Login"
+              @click="openLoginModal = true"
+              block
+              size="xl"
+            />
+            <!-- FIXME not in the middle on mobile -->
+            <login-modal v-model="openLoginModal" />
 
-          <UButton
-            label="Create Account"
-            @click="openCreateAccModal = true"
-            block
-            size="xl"
-            variant="outline"
-          />
-          <create-acc-modal v-model="openCreateAccModal" />
+            <UButton
+              label="Create Account"
+              @click="openCreateAccModal = true"
+              block
+              size="xl"
+              variant="outline"
+            />
+            <!-- FIXME note in the middle on mobile -->
+            <create-acc-modal v-model="openCreateAccModal" />
+          </div>
+        </div>
+
+        <div v-else>
+          <USkeleton class="h-12 w-full rounded-lg mb-6" />
+          <USkeleton class="h-12 w-full rounded-lg" />
         </div>
       </UCard>
     </div>
@@ -86,16 +124,12 @@
 
 <script setup lang="ts">
 const lastKickTime = ref<Date | null>(null);
-const {
-  signInGooglePopup,
-  user,
-  signOutFb,
-  signInEmailPassword,
-  registerUser,
-} = useFirebaseAuth();
+const { user, signOutFb } = useFirebaseAuth();
 const kicks = ref<Array<Kick>>([]);
 const { addKick, getKicks, uploadKicksToFirestore } = useKickStore();
 const { saveKicksLocal, getKicksLocal } = useLocalStore();
+
+const loaded = ref(false);
 
 const loggedIn = computed(() => {
   return user.value ? true : false;
@@ -104,41 +138,22 @@ const loggedIn = computed(() => {
 const openLoginModal = ref(false);
 const openCreateAccModal = ref(false);
 
-// Check for existing kicks data
-onMounted(async () => {
-  const storedKicks: Array<Kick> = loggedIn.value
-    ? await getKicks()
-    : getKicksLocal();
+const isReady = useState("firebaseReady");
 
-  if (storedKicks && Array.isArray(storedKicks) && storedKicks.length > 0) {
-    updateKicksFromStorage(storedKicks);
+// Check for existing kicks data when firebase is loaded (in case firebase login exists)
+watch(isReady, async (newVal, oldVal) => {
+  if (newVal === true) {
+    const storedKicks: Array<Kick> = loggedIn.value
+      ? await getKicks()
+      : getKicksLocal();
+
+    if (storedKicks && Array.isArray(storedKicks) && storedKicks.length > 0) {
+      updateKicksFromStorage(storedKicks);
+    }
+
+    loaded.value = true;
   }
 });
-
-// TODO move to helpers file
-function timeFromDate(date: Date) {
-  return date.toLocaleString("en-US", {
-    hour: "numeric",
-    minute: "numeric",
-    hour12: true,
-  });
-}
-
-function formatDate(date: Date): string {
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  };
-  const datePart = new Intl.DateTimeFormat("en-US", options).format(date);
-  const timePart = date.toLocaleString("en-US", {
-    hour: "numeric",
-    minute: "numeric",
-    hour12: true,
-  });
-
-  return `${datePart} at ${timePart}`;
-}
 
 async function recordKick() {
   if (loggedIn.value) {
@@ -173,6 +188,7 @@ watch(loggedIn, async (newValue, oldValue) => {
   // }
 
   if (newValue && !oldValue) {
+    loaded.value = false;
     try {
       // Upload any locally stored kicks to firebase
       const localKicks = getKicksLocal();
@@ -186,6 +202,7 @@ watch(loggedIn, async (newValue, oldValue) => {
       updateKicksFromStorage(storedKicks);
       // NOTE this does not sync dynamically with other devices,
       // assuming user will be using one device at a time / refresh when needed
+      loaded.value = true;
     } catch (error) {
       console.error("Failed to sync kicks data to database");
     }
@@ -207,9 +224,9 @@ const page = ref(1);
 const pageCount = 5;
 
 const sort = ref({
-  column: 'date',
-  direction: 'desc' as "desc" | "asc"
-})
+  column: "date",
+  direction: "desc" as "desc" | "asc",
+});
 
 const historyItems = computed(() => {
   const historyItems = kicks.value.slice(
@@ -229,6 +246,8 @@ const todayKicks = computed(() => {
   const tomorrow = new Date();
   tomorrow.setHours(24, 0, 0, 0);
 
-  return kicks.value.filter((kick) => kick.date >= today && kick.date < tomorrow);
-})
+  return kicks.value.filter(
+    (kick) => kick.date >= today && kick.date < tomorrow
+  );
+});
 </script>

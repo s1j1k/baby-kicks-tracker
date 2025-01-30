@@ -31,6 +31,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const firestore = getFirestore(app);
 
   const user = useState<User | null>("fb_user", () => null); // Create a global user state
+  const isReady = useState("firebaseReady", () => false); // Flag to indicate if Firebase is ready
 
   // Set persistence globally
   setPersistence(auth, browserLocalPersistence).catch((err) => {
@@ -40,6 +41,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   // Listen for auth state changes
   onAuthStateChanged(auth, (currentUser) => {
     user.value = currentUser; // Update user state
+    isReady.value = true; // Set Firebase as ready once user state is restored
   });
 
   nuxtApp.vueApp.provide("auth", auth);
