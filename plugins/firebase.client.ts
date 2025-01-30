@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { browserLocalPersistence, getAuth, onAuthStateChanged, setPersistence, type User } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
@@ -30,9 +30,23 @@ export default defineNuxtPlugin((nuxtApp) => {
   const auth = getAuth(app);
   const firestore = getFirestore(app);
 
+  const user = useState<User | null>("fb_user", () => null); // Create a global user state
+
+  // Set persistence globally
+  setPersistence(auth, browserLocalPersistence).catch((err) => {
+    console.error("Failed to set persistence:", err);
+  });
+
+  // Listen for auth state changes
+  onAuthStateChanged(auth, (currentUser) => {
+    user.value = currentUser; // Update user state
+  });
+
   nuxtApp.vueApp.provide("auth", auth);
   nuxtApp.provide("auth", auth);
 
   nuxtApp.vueApp.provide("firestore", firestore);
   nuxtApp.provide("firestore", firestore);
+
+  
 });

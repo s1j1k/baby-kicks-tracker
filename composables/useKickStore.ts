@@ -13,16 +13,14 @@ import {
 
 export const useKickStore = () => {
   const { $auth, $firestore } = useNuxtApp(); // Get Firebase instances
-  const auth = $auth as Auth;
-  const firestore = $firestore as Firestore;
 
   const addKick = async (): Promise<Kick | null> => {
-    const user = auth.currentUser; // Get the logged-in user
+    const user = $auth.currentUser; // Get the logged-in user
 
     if (!user) throw new Error("User not logged in");
 
     const userId = user.uid;
-    const kicksRef = collection(doc(firestore, "users", userId), "kicks"); // Path: users/{userId}/kicks
+    const kicksRef = collection(doc($firestore, "users", userId), "kicks"); // Path: users/{userId}/kicks
 
     try {
       const timestamp = Timestamp.now();
@@ -44,14 +42,14 @@ export const useKickStore = () => {
       return;
     }
 
-    const user = auth.currentUser; // Get the logged-in user
+    const user = $auth.currentUser; // Get the logged-in user
 
     if (!user) throw new Error("User not logged in");
 
     const userId = user.uid;
 
-    const userKicksCollection = collection(firestore, `users/${userId}/kicks`);
-    const batch = writeBatch(firestore);
+    const userKicksCollection = collection($firestore, `users/${userId}/kicks`);
+    const batch = writeBatch($firestore);
 
     localKicks.forEach((kick) => {
       // Convert localStorage date string to Firestore Timestamp
@@ -66,12 +64,12 @@ export const useKickStore = () => {
   };
 
   const getKicks = async (): Promise<Kick[]> => {
-    const user = auth.currentUser; // Get the logged-in user
+    const user = $auth.currentUser; // Get the logged-in user
 
     if (!user) throw new Error("User not logged in");
 
     const userId = user.uid;
-    const kicksRef = collection(doc(firestore, "users", userId), "kicks"); // Path: users/{userId}/kicks
+    const kicksRef = collection(doc($firestore, "users", userId), "kicks"); // Path: users/{userId}/kicks
 
     try {
       const q = query(kicksRef, orderBy("date", "desc")); // Sort by date
