@@ -1,5 +1,10 @@
 <template>
-  <UModal v-model="open">
+  <UModal
+    v-model="open"
+    :ui="{
+      container: 'flex min-h-full items-center justify-center text-center',
+    }"
+  >
     <UCard>
       <div class="space-y-4">
         <UForm
