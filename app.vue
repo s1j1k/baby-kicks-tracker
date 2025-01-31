@@ -37,15 +37,6 @@
         <div v-else>
           <!-- Overall Skeleton -->
           <USkeleton class="h-[150px] w-full rounded-md mb-4" />
-          <!-- Skeleton for Timeline -->
-          <!-- <USkeleton class="h-[200px] w-full rounded-md mb-4" /> -->
-
-          <!-- Skeleton for Main Button -->
-          <!-- NOTE this was very accurate -->
-          <!-- <USkeleton class="h-12 w-full rounded-lg mb-6" /> -->
-
-          <!-- Skeleton for Last Kick Time -->
-          <!-- <USkeleton class="h-4 w-[150px] mx-auto mt-6" /> -->
         </div>
       </UCard>
 
@@ -55,14 +46,12 @@
           <h2 class="text-lg font-semibold mb-4">History</h2>
           <div v-if="loggedIn" class="space-y-2 text-gray-900">
             <!-- Add history items here -->
-            History items
             <UTable
               :rows="historyItems"
-              :sort="sort"
               :progress="{ color: 'primary', animation: 'carousel' }"
             />
             <div
-              class="flex justify-end px-3 py-3.5 border-t border-gray-200 dark:border-gray-700"
+              class="flex justify-center px-3 py-3.5 border-t border-gray-200 dark:border-gray-700"
             >
               <UPagination
                 v-model="page"
@@ -75,11 +64,10 @@
         </div>
 
         <div v-else>
-          <USkeleton class="h-[116px] w-full rounded-md" />
+          <USkeleton class="h-[68px] w-full rounded-md" />
         </div>
       </UCard>
 
-      <!-- FIXME make it not on a card, just buttons for login -->
       <UCard class="mt-4">
         <div v-if="loaded">
           <div v-if="loggedIn" class="space-y-4">
@@ -98,7 +86,7 @@
               block
               size="xl"
             />
-            <!-- FIXME not in the middle on mobile -->
+
             <login-modal v-model="openLoginModal" />
 
             <UButton
@@ -108,14 +96,14 @@
               size="xl"
               variant="outline"
             />
-            <!-- FIXME note in the middle on mobile -->
+
             <create-acc-modal v-model="openCreateAccModal" />
           </div>
         </div>
 
         <div v-else>
-          <USkeleton class="h-12 w-full rounded-lg mb-6" />
-          <USkeleton class="h-12 w-full rounded-lg" />
+          <USkeleton class="h-11 w-full rounded-lg mb-5" />
+          <USkeleton class="h-11 w-full rounded-lg" />
         </div>
       </UCard>
     </div>
@@ -181,11 +169,11 @@ async function recordKick() {
 }
 
 watch(loggedIn, async (newValue, oldValue) => {
-  // FIXME required?
   // Clear local storage when user signs out
-  // if (oldValue && !newValue) {
-  //   kicks.value = [];
-  // }
+  if (oldValue && !newValue) {
+    kicks.value = [];
+    lastKickTime.value = null;
+  }
 
   if (newValue && !oldValue) {
     loaded.value = false;
@@ -223,12 +211,18 @@ function updateKicksFromStorage(storedKicks: Array<Kick>) {
 const page = ref(1);
 const pageCount = 5;
 
-const sort = ref({
-  column: "date",
-  direction: "desc" as "desc" | "asc",
-});
-
 const historyItems = computed(() => {
+  // Sort kicks by date in descending order (most recent first)
+  kicks.value.sort((a, b) => {
+    if (a.date > b.date) {
+      return -1;
+    }
+    if (a.date < b.date) {
+      return 1;
+    }
+    return 0;
+  });
+
   const historyItems = kicks.value.slice(
     (page.value - 1) * pageCount,
     page.value * pageCount
