@@ -45,11 +45,6 @@
         <div v-if="loaded">
           <h2 class="text-lg font-semibold mb-4">Activity Patterns</h2>
           <div v-if="loggedIn" class="space-y-2 text-gray-900">
-            <!-- <div
-              class="flex justify-center px-3 py-3.5 border-t border-gray-200 dark:border-gray-700"
-            >
-            </div> -->
-
             <div class="h-64">
               <chart-line :chartData="chartData" :chartOptions="chartOptions" />
             </div>
@@ -92,7 +87,7 @@
         </div>
       </UCard>
 
-      <UCard class="mt-4 mb-2">
+      <UCard class="mt-4 mb-4">
         <div v-if="loaded">
           <div v-if="loggedIn" class="space-y-4">
             <button
@@ -269,34 +264,6 @@ const todayKicks = computed(() => {
   );
 });
 
-// TODO ADD chart data
-// const times = [
-//   "12 AM",
-//   "1 AM",
-//   "2 AM",
-//   "3 AM",
-//   "4 AM",
-//   "5 AM",
-//   "6 AM",
-//   "7 AM",
-//   "8 AM",
-//   "9 AM",
-//   "10 AM",
-//   "11 AM",
-//   "12 PM",
-//   "1 PM",
-//   "2 PM",
-//   "3 PM",
-//   "4 PM",
-//   "5 PM",
-//   "6 PM",
-//   "7 PM",
-//   "8 PM",
-//   "9 PM",
-//   "10 PM",
-//   "11 PM",
-// ];
-
 const times = [
   "12 AM",
   "",
@@ -321,7 +288,7 @@ const times = [
   "",
   "9 PM",
   "",
-  // "11 PM",
+  "",
 ];
 
 const chartData = computed(() => {
@@ -329,20 +296,18 @@ const chartData = computed(() => {
 
   const now = new Date();
   const last10DaysData = new Array(times.length).fill(0);
-  // FIXME make last datapoint stop the graph
   const todayData = new Array(now.getHours() + 1).fill(null);
 
   // TODO check if there aren't 10 days in history - then hide this section or provide partial results?
 
-  // Get kicks average by hour across last 10 days
   kicks.value.map((kick) => {
-    // NOTE just take the last 10 days
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayMinus10Days = new Date();
     todayMinus10Days.setDate(-10);
 
     if (kick.date < today && kick.date >= todayMinus10Days) {
+      // Get kicks average by hour across last 10 days
       const index = kick.date.getHours();
       if (last10DaysData[index]) {
         last10DaysData[index] += 1 / 10;
@@ -350,6 +315,7 @@ const chartData = computed(() => {
         last10DaysData[index] = 1 / 10;
       }
     } else if (kick.date >= today) {
+      // Get kicks by hour for today
       const index = kick.date.getHours();
       if (todayData[index]) {
         todayData[index]++;
@@ -359,14 +325,11 @@ const chartData = computed(() => {
     }
   });
 
-  // Get kicks by hour for today
-
   // Fill the data before the latest kick today with 0s to allow interpolation
   const lastDataIndex = todayData.findLastIndex((i) => {
     return i !== null;
   });
 
-  // Backfill with 0s when there is minimal data points to allow interpolation
   const todayDataPadded = todayData.map((value, index) => {
     if (index < lastDataIndex && value === null) {
       return 0;
@@ -378,7 +341,7 @@ const chartData = computed(() => {
   return {
     labels: times,
     datasets: [
-    {
+      {
         label: "Today",
         backgroundColor: "#FACC15",
         borderColor: "#FACC15",
@@ -392,11 +355,7 @@ const chartData = computed(() => {
         borderColor: "#3B82F6",
         data: last10DaysData,
         pointRadius: 0,
-        // borderWidth: 2,
-        // pointRadius: 1,
-        // tension: 0.3,
       },
-      
     ],
   };
 
@@ -408,8 +367,6 @@ const chartOptions = {
   maintainAspectRatio: false,
   datasets: {
     line: {
-      // borderWidth: 3,
-
       tension: 0.3,
     },
   },
@@ -437,7 +394,6 @@ const chartOptions = {
       //   display: false,
       // },
       ticks: {
-        // beginAtZero: false,
         callback: function (value: number) {
           if (value % 1 === 0) {
             return value;
