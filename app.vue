@@ -50,7 +50,9 @@
             >
             </div> -->
 
-            <chart-line :chartData="chartData" :chartOptions="chartOptions" />
+            <div class="h-64">
+              <chart-line :chartData="chartData" :chartOptions="chartOptions" />
+            </div>
           </div>
           <div v-else class="text-gray-600">
             Log in to see activity patterns
@@ -319,7 +321,7 @@ const times = [
   "",
   "9 PM",
   "",
-  "12 AM", // NOTE this is actually 11 PM hour
+  // "11 PM",
 ];
 
 const chartData = computed(() => {
@@ -360,39 +362,41 @@ const chartData = computed(() => {
   // Get kicks by hour for today
 
   // Fill the data before the latest kick today with 0s to allow interpolation
-  const firstDataIndex = todayData.findIndex((i) => {
+  const lastDataIndex = todayData.findLastIndex((i) => {
     return i !== null;
   });
-  if (firstDataIndex && firstDataIndex > 0) {
-    todayData.fill(0, 0, firstDataIndex);
-  }
+
+  // Backfill with 0s when there is minimal data points to allow interpolation
+  const todayDataPadded = todayData.map((value, index) => {
+    if (index < lastDataIndex && value === null) {
+      return 0;
+    } else {
+      return value;
+    }
+  });
 
   return {
     labels: times,
     datasets: [
+    {
+        label: "Today",
+        backgroundColor: "#FACC15",
+        borderColor: "#FACC15",
+        data: todayDataPadded,
+        // Provide a little dot when there is only one element in the data array (no interpolation)
+        pointRadius: lastDataIndex === 0 ? 3 : 0,
+      },
       {
         label: "Last 10 Days",
-        backgroundColor: "#7986f8",
-        borderColor: "#7986f8",
+        backgroundColor: "#3B82F6",
+        borderColor: "#3B82F6",
         data: last10DaysData,
         pointRadius: 0,
         // borderWidth: 2,
         // pointRadius: 1,
         // tension: 0.3,
       },
-      {
-        label: "Today",
-        backgroundColor: "#f87979",
-        borderColor: "#f87979",
-        data: todayData,
-        // Provide a little dot when there is only one element in the data array (no interpolation)
-        pointRadius:
-          todayData.filter((i) => {
-            return i !== null;
-          }).length === 1
-            ? 0
-            : 1,
-      },
+      
     ],
   };
 
@@ -411,6 +415,9 @@ const chartOptions = {
   },
   scales: {
     x: {
+      ticks: {
+        autoSkip: false,
+      },
       grid: {
         display: false,
 
@@ -426,8 +433,16 @@ const chartOptions = {
       },
     },
     y: {
+      // ticks: {
+      //   display: false,
+      // },
       ticks: {
-        display: false,
+        // beginAtZero: false,
+        callback: function (value: number) {
+          if (value % 1 === 0) {
+            return value;
+          }
+        },
       },
       grid: {
         display: false,

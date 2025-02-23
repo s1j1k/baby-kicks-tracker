@@ -25,7 +25,7 @@
       :style="{ left: `${5 + getPosition(kick.date) * 90}%` }"
       class="absolute top-0 -translate-y-1/2 -translate-x-1/2"
     >
-      <UIcon name="mingcute:foot-fill" class="w-7 h-7 text-blue-950" />
+      <UIcon name="mingcute:foot-fill" class="w-7 h-7 text-blue-900 dark:text-yellow-500" />
     </div>
   </div>
 </template>
