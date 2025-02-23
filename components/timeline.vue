@@ -2,7 +2,7 @@
   <!-- TIMELINE -->
   <div class="relative w-full mb-12">
     <!-- Horizontal Timeline Bar -->
-    <div class="bg-blue-400 rounded-lg h-3 w-full relative"></div>
+    <div class="bg-blue-400 dark:bg-blue-900 rounded-lg h-3 w-full relative"></div>
 
     <!-- Timestamps -->
     <div class="relative">
@@ -25,7 +25,7 @@
       :style="{ left: `${5 + getPosition(kick.date) * 90}%` }"
       class="absolute top-0 -translate-y-1/2 -translate-x-1/2"
     >
-      <UIcon name="mingcute:foot-fill" class="w-7 h-7 text-blue-900 dark:text-yellow-500" />
+      <UIcon name="mingcute:foot-fill" class="w-7 h-7 text-blue-900 dark:text-blue-300" />
     </div>
   </div>
 </template>
