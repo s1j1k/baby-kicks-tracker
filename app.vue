@@ -43,7 +43,7 @@
       <!-- Pattern Section -->
       <UCard class="mt-4">
         <div v-if="loaded">
-          <h2 class="text-lg font-semibold mb-4">Activity Patterns</h2>
+          <h2 class="text-lg font-semibold mb-4">Activity Pattern</h2>
           <div v-if="loggedIn" class="space-y-2 text-gray-900">
             <div class="h-64">
               <chart-line :chartData="chartData" :chartOptions="chartOptions" />
