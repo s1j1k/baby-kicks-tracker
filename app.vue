@@ -92,7 +92,7 @@
         </div>
       </UCard>
 
-      <UCard class="mt-4">
+      <UCard class="mt-4 mb-2">
         <div v-if="loaded">
           <div v-if="loggedIn" class="space-y-4">
             <button
