@@ -13,10 +13,10 @@ export default defineNuxtConfig({
     },
   },
   typescript: {
-    typeCheck: true
+    typeCheck: true,
   },
   colorMode: {
-    preference: 'light'
+    preference: "light",
   },
   devtools: { enabled: true },
   modules: ["@nuxt/ui", "@nuxtjs/tailwindcss", "@vite-pwa/nuxt"],
@@ -45,6 +45,9 @@ export default defineNuxtConfig({
     devOptions: {
       enabled: true,
       type: "module",
+    },
+    client: {
+      installPrompt: true, // enable install prompt
     },
   },
 });

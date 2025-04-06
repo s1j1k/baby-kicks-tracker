@@ -126,6 +126,18 @@
         </div>
       </UCard>
     </div>
+
+    <!-- Install Prompt -->
+    <div class="sticky bottom-0">
+      <UCard v-if="$pwa?.showInstallPrompt && !$pwa?.offlineReady">
+        <UButton
+          label="Install Application"
+          class="mt-4"
+          size="sm"
+          @click="installPwa"
+        />
+      </UCard>
+    </div>
   </UContainer>
 </template>
 
@@ -135,6 +147,7 @@ const { user, signOutFb } = useFirebaseAuth();
 const kicks = ref<Array<Kick>>([]);
 const { addKick, getKicks, uploadKicksToFirestore } = useKickStore();
 const { saveKicksLocal, getKicksLocal } = useLocalStore();
+const { $pwa } = useNuxtApp();
 
 const loaded = ref(false);
 
@@ -405,5 +418,17 @@ const chartOptions = {
       },
     },
   },
+};
+
+const installPwa = () => {
+  if ($pwa?.showInstallPrompt) {
+    $pwa.install();
+  } else {
+    throw createError({
+      statusCode: 400,
+      message:
+        "Something went wrong installing the application, please try again later or contact support.",
+    });
+  }
 };
 </script>
